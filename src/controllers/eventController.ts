@@ -87,6 +87,20 @@ export const addGift = async (req: Request, res: Response) => {
         });
         res.status(201).json(gift);
     } catch (error) {
-        res.status(500).json({ message: 'Error adding gift', error });
+    }
+}
+
+export const deleteGift = async (req: Request, res: Response) => {
+    const { id, giftId } = req.params;
+    try {
+        await prisma.gift.delete({
+            where: {
+                id: parseInt(giftId),
+                eventId: parseInt(id)
+            }
+        });
+        res.json({ message: 'Gift deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting gift', error });
     }
 }

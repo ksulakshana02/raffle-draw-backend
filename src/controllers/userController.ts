@@ -47,9 +47,19 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
 export const deleteUser = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        await prisma.user.delete({ where: { id: parseInt(id) } });
+        const userId = parseInt(id);
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        // Manually delete related records first to avoid foreign key constraints
+        await prisma.attendance.deleteMany({ where: { userId } });
+        await prisma.winner.deleteMany({ where: { userId } });
+        // Delete user
+        await prisma.user.delete({ where: { id: userId } });
         res.json({ message: 'User deleted' });
     } catch (error) {
+        console.error("Delete user error:", error);
         res.status(500).json({ message: 'Error deleting user', error });
     }
 }
